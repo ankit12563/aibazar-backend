@@ -26,7 +26,7 @@ public class MyDataRestConfig implements RepositoryRestConfigurer {
 
     @Autowired
     public MyDataRestConfig(EntityManager theEntityManager) {
-        entityManager = theEntityManager;
+        this.entityManager = theEntityManager;
     }
 
     @Override
@@ -50,8 +50,11 @@ public class MyDataRestConfig implements RepositoryRestConfigurer {
         //- call an internal helper method
         exposeIds(config);
 
-        cors.addMapping(config.getBasePath() + "/**").allowedOrigins(theAllowedOrigins);
-
+//        cors.addMapping(config.getBasePath() + "/**").allowedOrigins(theAllowedOrigins);
+        cors.addMapping("/**")
+                .allowedOrigins(theAllowedOrigins)
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                .allowCredentials(true);
 
     }
 
