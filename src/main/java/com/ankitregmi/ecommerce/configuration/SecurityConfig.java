@@ -8,6 +8,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 
 @Configuration
 public class SecurityConfig {
@@ -20,41 +21,46 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        JwtAuthenticationConverter jwtAuthConverter = new JwtAuthenticationConverter();
+
         http
-                // Disable CSRF for API
+                // Disable CSRF for REST APIs
                 .csrf(csrf -> csrf.disable())
 
                 // Enable CORS
                 .cors(cors -> {})
 
-                // Stateless sessions for REST API
+                // Make session stateless
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // Define routes
+                // Authorization rules
                 .authorizeHttpRequests(auth -> auth
-                        // Public routes
+                        // Public endpoints
                         .requestMatchers(
                                 "/api/products/**",
                                 "/api/product-category/**"
                         ).permitAll()
 
-                        // Protected routes
+                        // Protected endpoints (require login)
                         .requestMatchers(
                                 "/api/orders/**",
                                 "/api/checkout/**"
                         ).authenticated()
 
-                        // Allow all else
+                        // Everything else allowed
                         .anyRequest().permitAll()
                 )
 
-                // ✅ Enable JWT Authentication (Auth0)
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt());
+                // ✅ Non-deprecated JWT config
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter))
+                );
 
         return http.build();
     }
 
-    // ✅ Auth0 JWT Decoder bean
+    // ✅ JWT Decoder Bean (Auth0 / Okta)
     @Bean
     public JwtDecoder jwtDecoder() {
         System.out.println("🔐 Building JwtDecoder for issuer = " + issuer);
