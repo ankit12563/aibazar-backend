@@ -25,34 +25,34 @@ public class SecurityConfig {
         JwtAuthenticationConverter jwtAuthConverter = new JwtAuthenticationConverter();
 
         http
-                // Disable CSRF for REST APIs
+                // Disable CSRF since we are using token-based authentication
                 .csrf(csrf -> csrf.disable())
 
-                // Enable CORS
+                // Enable CORS for frontend communication
                 .cors(cors -> {})
 
-                // Make session stateless
+                // Make the API stateless (no HTTP session)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 // Authorization rules
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
+                        // Public endpoints (no login required)
                         .requestMatchers(
                                 "/api/products/**",
                                 "/api/product-category/**"
                         ).permitAll()
 
-                        // Protected endpoints (require login)
+                        // Protected endpoints (require valid JWT)
                         .requestMatchers(
                                 "/api/orders/**",
                                 "/api/checkout/**"
                         ).authenticated()
 
-                        // Everything else allowed
+                        // Allow everything else
                         .anyRequest().permitAll()
                 )
 
-                // ✅ Non-deprecated JWT config
+                // ✅ Modern JWT configuration (non-deprecated)
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter))
                 );

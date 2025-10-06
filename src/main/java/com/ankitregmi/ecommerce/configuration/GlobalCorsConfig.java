@@ -14,13 +14,16 @@ public class GlobalCorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
 
-                registry.addMapping("/api/**")
+                registry.addMapping("/**") // ✅ Allow all API endpoints
                         .allowedOrigins(
-                                "http://localhost:4200",        // Local Angular
-                                "https://aibazzar.netlify.app"  // Deployed Netlify
+                                "http://localhost:4200",        // Angular local
+                                "https://aibazzar.netlify.app"  // Deployed frontend
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowCredentials(true);
+                        .allowedHeaders("*")                   // ✅ Allow all headers (important for Auth0 tokens)
+                        .exposedHeaders("Authorization", "Link", "X-Total-Count") // Optional but helpful
+                        .allowCredentials(true)
+                        .maxAge(3600);
             }
         };
     }
