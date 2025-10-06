@@ -33,7 +33,7 @@ public class SecurityConfig {
                         ).authenticated()
                         .anyRequest().permitAll()
                 )
-                // ✅ Use manual JWT decoder
+                // ✅ Use our manual JWT decoder bean
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder())))
                 .formLogin(login -> login.disable())
                 .httpBasic(basic -> basic.disable());
