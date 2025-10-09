@@ -6,6 +6,7 @@ import com.ankitregmi.ecommerce.entity.Customer;
 import com.ankitregmi.ecommerce.entity.Order;
 import com.ankitregmi.ecommerce.entity.OrderItem;
 import com.ankitregmi.ecommerce.repository.CustomerRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ public class CheckoutServiceImp implements CheckoutService{
     }
 
     @Override
+    @Transactional
     public PurchaseResponse placeOrder(Purchase purchase) {
 
         // retrieve the order from dto
@@ -35,6 +37,7 @@ public class CheckoutServiceImp implements CheckoutService{
         //populate order with order items
         Set<OrderItem> orderItems = purchase.getOrderItems();
         orderItems.forEach(item -> order.add(item));
+        order.setOrderItems(orderItems);
 
         //populate address
         order.setBillingAddress(purchase.getBillingAddress());
@@ -48,6 +51,15 @@ public class CheckoutServiceImp implements CheckoutService{
 
         if(customerFromDb != null) {
             customer = customerFromDb;
+        }
+        if (customer.getEmail() == null || customer.getEmail().isEmpty()) {
+            throw new IllegalArgumentException("Customer email is missing.");
+        }
+
+        // ✅ Check if customer already exists by email
+        Customer existingCustomer = customerRepository.findByEmail(customer.getEmail());
+        if (existingCustomer != null) {
+            customer = existingCustomer;
         }
         customer.add(order);
 
